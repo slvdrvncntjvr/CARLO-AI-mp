@@ -1,8 +1,9 @@
 "use client"
 
+import Link from "next/link"
 import { Phone, ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { PHLogo } from "@/components/ph-logo"
+import { SiteHeader } from "@/components/site-header"
 
 export function HeroSection({ onCall }: { onCall: () => void }) {
   return (
@@ -25,28 +26,7 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
         aria-hidden="true"
       />
 
-      {/* Nav */}
-      <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 pt-6">
-        <PHLogo className="text-white" />
-        <nav className="hidden items-center gap-8 text-sm text-white/70 md:flex">
-          <a href="#inventory" className="hover:text-white">
-            Inventory
-          </a>
-          <a href="#how-it-works" className="hover:text-white">
-            How CARLO works
-          </a>
-          <a href="#demo" className="hover:text-white">
-            Try CARLO
-          </a>
-        </nav>
-        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-          </span>
-          <span className="hidden sm:inline">CARLO online</span>
-        </div>
-      </header>
+      <SiteHeader variant="dark" />
 
       <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 pb-24 pt-20 md:pb-28 md:pt-24 lg:grid-cols-[1.35fr_1fr] lg:gap-8">
         <div className="max-w-4xl">
@@ -73,10 +53,10 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
               size="lg"
               className="h-14 rounded-full bg-primary px-8 text-base font-bold text-primary-foreground shadow-xl shadow-primary/30 hover:bg-primary/90"
             >
-              <a href="#inventory">
+              <Link href="/inventory">
                 Browse Inventory
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </a>
+              </Link>
             </Button>
 
             <button
