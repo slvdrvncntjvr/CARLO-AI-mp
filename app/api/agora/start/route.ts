@@ -83,7 +83,7 @@ export async function POST(req: Request) {
       ? `Hi! This is CARLO from Pearson Hardman Motors. I see you're looking at the ${focusCar.year} ${focusCar.make} ${focusCar.model}. Mind if I ask a few quick questions so I can help you faster?`
       : `Hi! This is CARLO from Pearson Hardman Motors. What kind of car are you in the market for today?`
 
-    const systemPrompt = buildSystemPrompt({ focusCarId, channelName })
+    const systemPrompt = buildSystemPrompt({ focusCarId, channelName, leadId: lead.id })
 
     const payload = {
       name: `carlo-${channelName}`,
@@ -91,36 +91,30 @@ export async function POST(req: Request) {
         channel: channelName,
         token: agentToken,
         agent_rtc_uid: String(agentUid),
-        remote_rtc_uids: [String(userUid)],
         enable_string_uid: false,
-        idle_timeout: 60,
-        advanced_features: { enable_aivad: true },
-        asr: { language: "en-US", vendor: "deepgram" },
+        asr: {
+          vendor: "deepgram",
+          language: "en-US",
+        },
         llm: {
           url: llmUrl,
-          api_key: process.env.CARLO_LLM_SHARED_SECRET || "carlo-internal",
+          api_key: "carlo",
           system_messages: [
             {
               role: "system",
-              content: systemPrompt + `\n\n# CALL CONTEXT\nlead_id=${lead.id}\nchannel=${channelName}`,
+              content: systemPrompt,
             },
           ],
           greeting_message: greeting,
-          failure_message: "Give me one second, my line just hiccuped.",
-          max_history: 24,
-          params: { model: "carlo-router", lead_id: lead.id, channel_name: channelName },
+          max_history: 20,
           style: "openai",
-          input_modalities: ["text"],
-          output_modalities: ["text"],
         },
         tts: {
           vendor: "aws-polly",
           params: {
             region: "us-west-2",
+            voice_id: "Joanna",
           },
-        },
-        parameters: {
-          data_channel: "datastream",
         },
       },
     }
@@ -137,7 +131,11 @@ export async function POST(req: Request) {
 
     const agoraJson = await agoraRes.json().catch(() => ({}))
     if (!agoraRes.ok) {
-      console.error("[v0] agora join failed", agoraRes.status, agoraJson)
+      console.error("[v0] agora join failed", {
+        status: agoraRes.status,
+        response: agoraJson,
+        payloadSent: payload,
+      })
       await supabase.from("leads").update({ status: "lost", summary: "Agent failed to start" }).eq("id", lead.id)
       return NextResponse.json(
         { error: "Failed to start CARLO", detail: agoraJson },
