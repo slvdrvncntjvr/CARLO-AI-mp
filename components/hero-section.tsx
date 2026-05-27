@@ -50,11 +50,6 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
 
       <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 pb-24 pt-20 md:pb-28 md:pt-24 lg:grid-cols-[1.35fr_1fr] lg:gap-8">
         <div className="max-w-4xl">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/80 backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            <span>Pearson Hardman Motors · Metro Manila</span>
-          </div>
-
           <h1 className="text-balance text-5xl font-bold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
             Quality used cars,
             <br />
