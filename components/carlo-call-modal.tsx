@@ -112,8 +112,12 @@ export function CarloCallModal({
         <div className="border-b border-white/10 px-6 pb-5 pt-6">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="grid h-12 w-12 place-items-center rounded-full bg-primary text-primary-foreground font-mono text-sm font-bold">
-                C
+              <div className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-primary/15 ring-1 ring-primary/40">
+                <img
+                  src="/carlo/carlo-greeting.png"
+                  alt="CARLO"
+                  className="h-full w-full object-cover object-top"
+                />
               </div>
               {state === "connected" && (
                 <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-primary ring-2 ring-charcoal" />

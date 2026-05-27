@@ -1,23 +1,21 @@
-import { Search, AudioLines, Handshake } from "lucide-react"
-
 const steps = [
   {
     n: "01",
-    icon: Search,
+    pose: "/carlo/carlo-tablet.png",
     title: "Browse Our Inventory",
     body:
       "Explore our available units below and find a car that fits your needs and budget. All listings are real, in stock, and verified.",
   },
   {
     n: "02",
-    icon: AudioLines,
+    pose: "/carlo/carlo-welcome.png",
     title: "Call CARLO",
     body:
       "Tap the call button on any listing. CARLO answers instantly, confirms availability, and answers all your questions in real time.",
   },
   {
     n: "03",
-    icon: Handshake,
+    pose: "/carlo/carlo-confident.png",
     title: "Negotiate. Get the Deal.",
     body:
       "CARLO negotiates on our behalf live on the call. When you're ready, CARLO captures your details and we follow up to close.",
@@ -46,15 +44,20 @@ export function HowItWorks() {
               key={s.n}
               className="group relative overflow-hidden rounded-2xl border border-border bg-card p-7 transition hover:border-primary/40"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <span className="font-mono text-xs font-semibold tracking-widest text-muted-foreground">
                   {s.n}
                 </span>
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/12 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
-                  <s.icon className="h-5 w-5" strokeWidth={2} />
+                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted/40 ring-1 ring-border">
+                  <img
+                    src={s.pose || "/placeholder.svg"}
+                    alt=""
+                    aria-hidden="true"
+                    className="h-full w-full object-cover object-top"
+                  />
                 </div>
               </div>
-              <h3 className="mt-8 text-xl font-bold tracking-tight">{s.title}</h3>
+              <h3 className="mt-6 text-xl font-bold tracking-tight">{s.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
               <span
                 className="absolute -bottom-px left-7 right-7 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent opacity-0 transition group-hover:opacity-100"

@@ -28,7 +28,13 @@ export function DemoSection({ onCall }: { onCall: () => void }) {
         </div>
 
         <div className="mt-14 rounded-3xl border border-white/10 bg-charcoal-2/60 p-2 shadow-2xl backdrop-blur">
-          <div className="rounded-[1.4rem] border border-white/5 bg-ink p-10 md:p-16">
+          <div className="relative rounded-[1.4rem] border border-white/5 bg-ink p-10 md:p-16">
+            <img
+              src="/carlo/carlo-greeting.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute bottom-0 right-2 hidden h-56 w-auto select-none opacity-90 md:block lg:right-6 lg:h-72"
+            />
             <div className="flex flex-col items-center text-center">
               {/* Big animated call orb */}
               <div className="relative">
