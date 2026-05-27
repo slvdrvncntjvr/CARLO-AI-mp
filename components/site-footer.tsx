@@ -9,7 +9,7 @@ export function SiteFooter() {
           <div className="max-w-md">
             <PHLogo />
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-              Pearson Hardman Motors — Powered by Agora WorkFlow PH &amp; Team Pearson Hardman.
+              Pearson Hardman Motors — Powered by Agora WorkFlow PH
             </p>
           </div>
 
