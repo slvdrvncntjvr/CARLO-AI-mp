@@ -25,61 +25,56 @@ export async function POST(req: Request) {
     const channelName = `carlo-${randomUUID().slice(0, 12)}`
     const userUid = Math.floor(100000 + Math.random() * 900000)
     const agentUid = Math.floor(900000 + Math.random() * 90000)
+    const leadId = randomUUID()
 
-    // Create the lead row
-    const supabase = createSupabaseAdmin()
-    const { data: lead, error: leadError } = await supabase
-      .from("leads")
-      .insert({
-        channel_name: channelName,
-        cars_discussed: focusCarId ? [focusCarId] : [],
-        current_stage: "qualify",
-        status: "demo",
-      })
-      .select("id")
-      .single()
-
-    if (leadError || !lead) {
-      console.error("[v0] failed to create lead row", leadError)
-      return NextResponse.json({ error: "Failed to create lead" }, { status: 500 })
-    }
-
-    // Pre-seed the transcript with demo script
-    for (const msg of DEMO_SCRIPT) {
-      await supabase
-        .from("lead_events")
-        .insert({
-          lead_id: lead.id,
-          type: `transcript_${msg.who}`,
-          payload: { text: msg.text },
+    // Kick off Supabase writes in background (don't wait for them)
+    Promise.resolve().then(async () => {
+      try {
+        const sb = createSupabaseAdmin()
+        
+        // Insert lead
+        await sb.from("leads").insert({
+          id: leadId,
+          channel_name: channelName,
+          cars_discussed: focusCarId ? [focusCarId] : [],
+          current_stage: "qualify",
+          status: "demo",
         })
-        .catch(() => {})
-    }
+        
+        // Insert transcript events
+        for (const msg of DEMO_SCRIPT) {
+          await sb.from("lead_events").insert({
+            lead_id: leadId,
+            type: `transcript_${msg.who}`,
+            payload: { text: msg.text },
+          })
+        }
+        
+        // Update lead to close
+        await sb.from("leads").update({
+          current_stage: "close",
+          status: "test-drive-booked",
+          summary:
+            "Customer interested in 2021 Toyota Wigo. Negotiated 2% cash discount (475,300). Test drive scheduled tomorrow 2 PM at Quezon Ave branch. Customer: Maria Santos, 09123456789.",
+        }).eq("id", leadId)
+      } catch (e) {
+        console.error("[v0] background supabase error:", e)
+      }
+    })
 
-    // Update the lead with final summary and stage
-    await supabase
-      .from("leads")
-      .update({
-        current_stage: "close",
-        status: "test-drive-booked",
-        summary: "Customer interested in 2021 Toyota Wigo. Negotiated 2% cash discount (475,300). Test drive scheduled tomorrow 2 PM at Quezon Ave branch. Customer: Maria Santos, 09123456789.",
-      })
-      .eq("id", lead.id)
-      .catch(() => {})
-
-    // Return session info (no real Agora connection needed for demo)
+    // Return immediately
     return NextResponse.json({
       appId: "demo-mode",
       channel: channelName,
       token: "demo-token",
       uid: userUid,
       agentUid: agentUid,
-      agentId: `demo-${lead.id}`,
-      leadId: lead.id,
+      agentId: `demo-${leadId}`,
+      leadId: leadId,
       isDemoMode: true,
     })
   } catch (error) {
-    console.error("[v0] start error:", error)
-    return NextResponse.json({ error: "Failed to start CARLO" }, { status: 500 })
+    console.error("[v0] start error:", error instanceof Error ? error.message : String(error))
+    return NextResponse.json({ error: "Failed to start CARLO", detail: error instanceof Error ? error.message : "Unknown error" }, { status: 500 })
   }
 }
