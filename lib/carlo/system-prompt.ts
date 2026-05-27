@@ -1,6 +1,6 @@
 import { carBlurb, carOneLine, findCar, loadKnowledgeBase } from "./kb"
 
-export function buildSystemPrompt(opts: { focusCarId?: string; channelName: string }) {
+export function buildSystemPrompt(opts: { focusCarId?: string; channelName: string; leadId?: string }) {
   const kb = loadKnowledgeBase()
   const focus = opts.focusCarId ? findCar(opts.focusCarId) : undefined
   const lotOverview = kb.inventory.map(carOneLine).join("\n")
@@ -8,6 +8,8 @@ export function buildSystemPrompt(opts: { focusCarId?: string; channelName: stri
   const focusBlock = focus
     ? `\n# THE CAR THE CUSTOMER IS LOOKING AT\n${carBlurb(focus)}\n\nLead the conversation around this unit unless the customer pivots.\n`
     : ""
+
+  const leadIdBlock = opts.leadId ? `\n# INTERNAL\nlead_id=${opts.leadId}\n` : ""
 
   return `You are CARLO — the AI sales agent at Pearson Hardman Motors, a Metro Manila used-car dealership.
 
@@ -48,5 +50,5 @@ ${lotOverview}
 # KNOWLEDGE BASE
 Use lookup_car(car_id) when you need full specs, financing options, or talking points for a unit.
 
-Keep replies under 2 sentences unless the customer asks for detail. Move the conversation forward every turn.`
+Keep replies under 2 sentences unless the customer asks for detail. Move the conversation forward every turn.${leadIdBlock}`
 }

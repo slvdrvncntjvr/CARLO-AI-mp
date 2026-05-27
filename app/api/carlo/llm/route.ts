@@ -10,6 +10,7 @@
  *   ↳ we return the final OpenAI-format response back to Agora, which TTS-es it.
  */
 import { NextResponse } from "next/server"
+import { createSupabaseAdmin } from "@/lib/supabase/server"
 import { executeTool, toolSchemas } from "@/lib/carlo/tools"
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
@@ -132,6 +133,21 @@ export async function POST(req: Request) {
         role: "assistant",
         content: "Let me check on that and get right back to you.",
       }
+    }
+
+    // Write CARLO's response to transcript in Supabase so the modal can render it live
+    if (final.content && ctx.leadId !== "unknown") {
+      try {
+        const sb = createSupabaseAdmin()
+        await sb
+          .from("lead_events")
+          .insert({
+            lead_id: ctx.leadId,
+            type: "transcript_carlo",
+            payload: { text: final.content },
+          })
+          .catch(() => {}) // Silent fail, don't block the response
+      } catch {}
     }
 
     // Return a minimal OpenAI-shaped response.

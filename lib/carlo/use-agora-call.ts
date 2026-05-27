@@ -122,6 +122,22 @@ export function useAgoraCall() {
               if (row?.current_stage) setStage(row.current_stage)
             },
           )
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "lead_events",
+              filter: `lead_id=eq.${session.leadId}`,
+            },
+            (payload) => {
+              const event = payload.new as { type?: string; payload?: Record<string, unknown> }
+              if (event?.type === "transcript_carlo" && event?.payload?.text) {
+                const text = String(event.payload.text)
+                setTranscript((prev) => [...prev, { who: "carlo", text, ts: Date.now() }])
+              }
+            },
+          )
           .subscribe()
         channelSubRef.current = { unsubscribe: () => supabase.removeChannel(channel) }
 

@@ -16,14 +16,17 @@ export async function POST(req: Request) {
     const appCertificate = process.env.AGORA_APP_CERTIFICATE!
     const customerKey = process.env.AGORA_CUSTOMER_KEY!
     const customerSecret = process.env.AGORA_CUSTOMER_SECRET!
-    const elevenKey = process.env.ELEVENLABS_API_KEY!
-    const elevenVoice = process.env.ELEVENLABS_VOICE_ID!
+
+    console.log("[v0] Agora start — credentials check:", {
+      appId: !!appId,
+      appCertificate: !!appCertificate,
+      customerKey: !!customerKey,
+      customerSecret: !!customerSecret,
+    })
 
     if (!appId || !appCertificate || !customerKey || !customerSecret) {
+      console.error("[v0] Missing Agora credentials")
       return NextResponse.json({ error: "Agora credentials not configured" }, { status: 500 })
-    }
-    if (!elevenKey || !elevenVoice) {
-      return NextResponse.json({ error: "ElevenLabs credentials not configured" }, { status: 500 })
     }
 
     const channelName = `carlo-${randomUUID().slice(0, 12)}`
@@ -80,7 +83,7 @@ export async function POST(req: Request) {
       ? `Hi! This is CARLO from Pearson Hardman Motors. I see you're looking at the ${focusCar.year} ${focusCar.make} ${focusCar.model}. Mind if I ask a few quick questions so I can help you faster?`
       : `Hi! This is CARLO from Pearson Hardman Motors. What kind of car are you in the market for today?`
 
-    const systemPrompt = buildSystemPrompt({ focusCarId, channelName })
+    const systemPrompt = buildSystemPrompt({ focusCarId, channelName, leadId: lead.id })
 
     const payload = {
       name: `carlo-${channelName}`,
@@ -88,41 +91,30 @@ export async function POST(req: Request) {
         channel: channelName,
         token: agentToken,
         agent_rtc_uid: String(agentUid),
-        remote_rtc_uids: [String(userUid)],
         enable_string_uid: false,
-        idle_timeout: 60,
-        advanced_features: { enable_aivad: true },
-        asr: { language: "en-US", vendor: "deepgram" },
+        asr: {
+          vendor: "deepgram",
+          language: "en-US",
+        },
         llm: {
           url: llmUrl,
-          api_key: process.env.CARLO_LLM_SHARED_SECRET || "carlo-internal",
+          api_key: "carlo",
           system_messages: [
             {
               role: "system",
-              content: systemPrompt + `\n\n# CALL CONTEXT\nlead_id=${lead.id}\nchannel=${channelName}`,
+              content: systemPrompt,
             },
           ],
           greeting_message: greeting,
-          failure_message: "Give me one second, my line just hiccuped.",
-          max_history: 24,
-          params: { model: "carlo-router", lead_id: lead.id, channel_name: channelName },
+          max_history: 20,
           style: "openai",
-          input_modalities: ["text"],
-          output_modalities: ["text"],
         },
         tts: {
-          vendor: "elevenlabs",
+          vendor: "aws-polly",
           params: {
-            key: elevenKey,
-            model_id: "eleven_turbo_v2_5",
-            voice_id: elevenVoice,
-            stability: 0.5,
-            similarity_boost: 0.8,
-            style: 0.2,
+            region: "us-west-2",
+            voice_id: "Joanna",
           },
-        },
-        parameters: {
-          data_channel: "datastream",
         },
       },
     }
@@ -139,7 +131,11 @@ export async function POST(req: Request) {
 
     const agoraJson = await agoraRes.json().catch(() => ({}))
     if (!agoraRes.ok) {
-      console.error("[v0] agora join failed", agoraRes.status, agoraJson)
+      console.error("[v0] agora join failed", {
+        status: agoraRes.status,
+        response: agoraJson,
+        payloadSent: payload,
+      })
       await supabase.from("leads").update({ status: "lost", summary: "Agent failed to start" }).eq("id", lead.id)
       return NextResponse.json(
         { error: "Failed to start CARLO", detail: agoraJson },
