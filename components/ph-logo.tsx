@@ -1,14 +1,33 @@
-export function PHLogo({ className = "" }: { className?: string }) {
+export function PHLogo({
+  className = "",
+  variant = "light",
+}: {
+  className?: string
+  variant?: "light" | "dark"
+}) {
+  const isDark = variant === "dark"
+  const wordColor = isDark ? "text-white" : "text-foreground"
+  const subColor = isDark ? "text-white/50" : "text-muted-foreground"
+  const ruleColor = isDark ? "bg-white/15" : "bg-foreground/15"
+
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
-      <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <span className="font-mono text-sm font-bold tracking-tighter">PH</span>
-        <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary ring-2 ring-charcoal" />
+    <div className={`flex items-center gap-3 ${className}`}>
+      <div className="flex items-baseline gap-2 leading-none">
+        <span className={`font-serif text-[22px] font-semibold tracking-tight ${wordColor}`}>
+          Pearson
+        </span>
+        <span className="relative inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+        <span className={`font-serif text-[22px] font-semibold tracking-tight ${wordColor}`}>
+          Hardman
+        </span>
       </div>
-      <div className="flex flex-col leading-none">
-        <span className="text-[15px] font-bold tracking-tight">Pearson Hardman</span>
-        <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+      <span className={`hidden h-6 w-px ${ruleColor} sm:inline-block`} aria-hidden="true" />
+      <div className="hidden flex-col leading-none sm:flex">
+        <span className={`text-[10px] font-semibold uppercase tracking-[0.28em] ${subColor}`}>
           Motors
+        </span>
+        <span className={`mt-0.5 text-[9px] font-medium uppercase tracking-[0.2em] ${subColor}`}>
+          Est. Manila
         </span>
       </div>
     </div>

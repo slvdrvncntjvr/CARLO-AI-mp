@@ -4,8 +4,28 @@ import Link from "next/link"
 import { ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SiteHeader } from "@/components/site-header"
+import { inventory, formatPHP } from "@/lib/inventory"
+
+const bodyTypeOrder = ["Sedan", "SUV", "Pickup", "MPV", "Hatchback"] as const
+
+function buildLotComposition() {
+  const counts = new Map<string, number>()
+  for (const car of inventory) {
+    counts.set(car.bodyType, (counts.get(car.bodyType) ?? 0) + 1)
+  }
+  return bodyTypeOrder
+    .map((label) => ({ label, count: counts.get(label) ?? 0 }))
+    .filter((row) => row.count > 0)
+}
 
 export function HeroSection({ onCall }: { onCall: () => void }) {
+  const composition = buildLotComposition()
+  const totalUnits = inventory.length
+  const prices = inventory.map((c) => c.price)
+  const minPrice = Math.min(...prices)
+  const maxPrice = Math.max(...prices)
+  const maxBodyCount = Math.max(...composition.map((r) => r.count))
+
   return (
     <section
       id="top"
@@ -73,18 +93,55 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
             </button>
           </div>
 
-          <div className="mt-14 grid max-w-2xl grid-cols-3 gap-6 border-t border-white/10 pt-8">
-            <div>
-              <p className="font-mono text-3xl font-bold text-white">8</p>
-              <p className="mt-1 text-xs text-white/50">Units on the lot</p>
+          <div className="mt-14 max-w-2xl rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur">
+            <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                  Lot composition
+                </p>
+                <p className="mt-1 font-serif text-lg font-semibold text-white">
+                  {totalUnits} units in stock
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/50">
+                  Price range
+                </p>
+                <p className="mt-1 font-mono text-sm font-semibold text-white">
+                  {formatPHP(minPrice)} <span className="text-white/40">—</span> {formatPHP(maxPrice)}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="font-mono text-3xl font-bold text-white">120-pt</p>
-              <p className="mt-1 text-xs text-white/50">Inspection per unit</p>
-            </div>
-            <div>
-              <p className="font-mono text-3xl font-bold text-white">24/7</p>
-              <p className="mt-1 text-xs text-white/50">CARLO on standby</p>
+
+            <ul className="mt-4 space-y-2.5">
+              {composition.map((row) => {
+                const widthPct = (row.count / maxBodyCount) * 100
+                return (
+                  <li key={row.label} className="flex items-center gap-3 text-sm">
+                    <span className="w-20 shrink-0 text-white/70">{row.label}</span>
+                    <span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-white/5">
+                      <span
+                        className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                        style={{ width: `${widthPct}%` }}
+                      />
+                    </span>
+                    <span className="w-6 shrink-0 text-right font-mono text-xs text-white">
+                      {row.count}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+
+            <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4 text-xs">
+              <span className="inline-flex items-center gap-2 text-white/60">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                </span>
+                CARLO is online &middot; 24/7
+              </span>
+              <span className="text-white/40">120-pt inspection on every unit</span>
             </div>
           </div>
         </div>

@@ -10,7 +10,7 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
   return (
     <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 pt-6">
       <Link href="/" aria-label="Pearson Hardman Motors home">
-        <PHLogo className={isDark ? "text-white" : "text-foreground"} />
+        <PHLogo variant={isDark ? "dark" : "light"} />
       </Link>
       <nav className={`hidden items-center gap-8 text-sm md:flex ${linkBase}`}>
         <Link href="/inventory" className="hover:opacity-100">
