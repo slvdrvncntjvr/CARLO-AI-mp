@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { randomUUID } from "node:crypto"
 import { createSupabaseAdmin } from "@/lib/supabase/server"
+
 // Demo script: realistic car sales conversation
 const DEMO_SCRIPT = [
   { who: "carlo", text: "Hi! This is CARLO from Pearson Hardman Motors. I see you're interested in the Toyota Wigo. It's a fantastic choice — great fuel efficiency and reliability. Can I ask what your main use case is?" },
