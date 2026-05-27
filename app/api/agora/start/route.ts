@@ -34,38 +34,7 @@ export async function POST(req: Request) {
     }
     if (!elevenKey || !elevenVoice) {
       console.error("[v0] Missing ElevenLabs credentials", { elevenKey: !!elevenKey, elevenVoice: !!elevenVoice })
-      // DEMO MODE: return a fake session that streams mock transcripts
-      // This lets judges see the full workflow while we debug the real TTS config
-      const supabase = createSupabaseAdmin()
-      const { data: lead, error: leadError } = await supabase
-        .from("leads")
-        .insert({
-          channel_name: `demo-${randomUUID().slice(0, 12)}`,
-          cars_discussed: focusCarId ? [focusCarId] : [],
-          current_stage: "qualify",
-          status: "demo",
-        })
-        .select("id")
-        .single()
-
-      if (leadError || !lead) {
-        return NextResponse.json({ error: "Failed to create lead" }, { status: 500 })
-      }
-
-      const demoUid = Math.floor(100000 + Math.random() * 900000)
-      const demoAgentUid = Math.floor(900000 + Math.random() * 90000)
-
-      // Return a demo session that works with the modal UI
-      return NextResponse.json({
-        appId: "demo-mode",
-        channel: `demo-${lead.id}`,
-        token: "demo-token",
-        uid: demoUid,
-        agentUid: demoAgentUid,
-        agentId: `demo-agent-${lead.id}`,
-        leadId: lead.id,
-        isDemoMode: true,
-      })
+      return NextResponse.json({ error: "ElevenLabs credentials not configured" }, { status: 500 })
     }
 
     const channelName = `carlo-${randomUUID().slice(0, 12)}`

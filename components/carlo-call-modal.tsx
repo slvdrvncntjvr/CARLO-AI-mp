@@ -119,8 +119,8 @@ export function CarloCallModal({
           </div>
         </div>
 
-        {/* Body */}
-        <div className="relative h-[280px] overflow-y-auto px-6 py-5">
+        {/* Body — Transcript */}
+        <div className="relative h-[280px] overflow-y-auto px-6 py-5 space-y-4">
           {(call.status === "starting" || call.status === "connecting") && (
             <div className="flex h-full flex-col items-center justify-center gap-4">
               <div className="relative">
@@ -152,47 +152,85 @@ export function CarloCallModal({
           {(call.status === "connected" ||
             call.status === "ending" ||
             call.status === "ended") && (
-            <div className="flex h-full flex-col items-center justify-center gap-6">
-              <div className="relative grid place-items-center">
-                <div
-                  className="absolute inset-0 rounded-full bg-primary/30 transition-transform"
-                  style={{
-                    transform: `scale(${1 + (call.agentLevel / 100) * 1.4})`,
-                    opacity: call.agentSpeaking ? 0.8 : 0.25,
-                  }}
-                />
-                <div className="relative grid h-24 w-24 place-items-center overflow-hidden rounded-full bg-primary/15 ring-1 ring-primary/40">
-                  <img
-                    src="/carlo/carlo-greeting.png"
-                    alt=""
-                    className="h-full w-full object-cover object-top"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center gap-2">
-                <p className="text-sm font-medium text-white/80">
-                  {call.agentSpeaking
-                    ? "CARLO is speaking…"
-                    : call.muted
-                      ? "Microphone muted"
-                      : "CARLO is listening"}
-                </p>
-                <div className="flex items-center gap-1.5">
-                  {Array.from({ length: 12 }).map((_, i) => {
-                    const threshold = (i + 1) * (100 / 12)
-                    const filled = call.micLevel >= threshold
-                    return (
-                      <span
-                        key={i}
-                        className={`h-3 w-1 rounded-full transition ${filled ? "bg-primary" : "bg-white/10"}`}
+            <div className="flex flex-col gap-4">
+              {call.transcript.length === 0 ? (
+                <div className="flex h-full flex-col items-center justify-center gap-2 py-12">
+                  <div className="relative">
+                    <div
+                      className="absolute inset-0 rounded-full bg-primary/30 transition-transform"
+                      style={{
+                        transform: `scale(${1 + (call.agentLevel / 100) * 1.4})`,
+                        opacity: call.agentSpeaking ? 0.8 : 0.25,
+                      }}
+                    />
+                    <div className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-full bg-primary/15 ring-1 ring-primary/40">
+                      <img
+                        src="/carlo/carlo-greeting.png"
+                        alt=""
+                        className="h-full w-full object-cover object-top"
                       />
-                    )
-                  })}
+                    </div>
+                  </div>
+                  <p className="text-xs text-white/60">Waiting for CARLO to start…</p>
                 </div>
-              </div>
+              ) : (
+                <>
+                  {call.transcript.map((line, i) => (
+                    <div
+                      key={i}
+                      className={`flex gap-3 ${line.who === "carlo" ? "justify-start" : "justify-end"}`}
+                    >
+                      {line.who === "carlo" && (
+                        <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-primary/20">
+                          <div className="h-3 w-3 rounded-full bg-primary" />
+                        </div>
+                      )}
+                      <div
+                        className={`max-w-[70%] rounded-lg px-3 py-2 text-sm leading-snug ${
+                          line.who === "carlo"
+                            ? "bg-primary/15 text-white"
+                            : "bg-white/10 text-white/90"
+                        }`}
+                      >
+                        {line.text}
+                      </div>
+                      {line.who === "you" && (
+                        <div className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-white/20">
+                          <div className="h-3 w-3 rounded-full bg-white" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {call.agentSpeaking && call.transcript[call.transcript.length - 1]?.who === "carlo" && (
+                    <div className="flex gap-2 pl-9">
+                      <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-primary/60" />
+                      <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-primary/60 animation-delay-100" />
+                      <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-primary/60 animation-delay-200" />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
+        </div>}
+        {/* Status bar */}
+        <div className="flex items-center justify-center gap-2 border-t border-white/10 bg-white/5 px-6 py-2">
+          <div className="flex items-center gap-1.5">
+            {Array.from({ length: 12 }).map((_, i) => {
+              const threshold = (i + 1) * (100 / 12)
+              const filled = call.micLevel >= threshold
+              return (
+                <span
+                  key={i}
+                  className={`h-1.5 w-0.5 rounded-full transition ${filled ? "bg-primary" : "bg-white/10"}`}
+                />
+              )
+            })}
+          </div>
+          <p className="text-xs text-white/60 ml-auto">
+            {call.agentSpeaking ? "CARLO is speaking" : call.muted ? "Mic muted" : "Listening"}
+          </p>
+        </div>
         </div>
 
         {/* Controls */}
