@@ -16,14 +16,14 @@ function buildScript(car?: Car): Line[] {
   if (!car) {
     return [
       { who: "carlo", text: "Hi! This is CARLO from Pearson Hardman Motors. What kind of car are you looking for today?" },
-      { who: "you", text: "Just browsing for now — what do you have under 700 thousand?" },
-      { who: "carlo", text: "Great budget. We have a 2020 Honda City in silver at PHP 695,000 — almost spotless. Want me to walk you through it?" },
+      { who: "you", text: "Just browsing — what do you have under 700 thousand?" },
+      { who: "carlo", text: "Great budget. We have a 2020 Toyota Vios 1.3 XE CVT in pearl white at PHP 595,000 — only 42,000 kilometers, casa-maintained. Want me to walk you through it?" },
     ]
   }
   return [
     {
       who: "carlo",
-      text: `Hi! I see you're asking about the ${car.year} ${car.make} ${car.model} — the ${car.color.toLowerCase()} one in ${car.location}. What would you like to know?`,
+      text: `Hi! I see you're asking about the ${car.year} ${car.make} ${car.model} ${car.variant} — the ${car.color.toLowerCase()} one in ${car.location}. What would you like to know?`,
     },
     { who: "you", text: "How's the condition? And is the price negotiable?" },
     {

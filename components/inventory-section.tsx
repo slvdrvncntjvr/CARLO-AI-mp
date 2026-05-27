@@ -11,7 +11,7 @@ const transmissionOptions = ["All", "Automatic", "Manual"] as const
 const fuelOptions = ["All", "Gasoline", "Diesel"] as const
 
 const MIN_PRICE = 300_000
-const MAX_PRICE = 1_300_000
+const MAX_PRICE = 1_600_000
 
 const conditionStyles: Record<Car["condition"], string> = {
   Excellent: "bg-primary/15 text-primary border-primary/30",
@@ -173,11 +173,12 @@ function CarCard({ car, onCall }: { car: Car; onCall: () => void }) {
 
       <div className="flex flex-1 flex-col p-5">
         <div className="flex items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <p className="font-mono text-xs text-muted-foreground">{car.year}</p>
-            <h3 className="mt-0.5 text-lg font-bold leading-tight tracking-tight">
+            <h3 className="mt-0.5 truncate text-lg font-bold leading-tight tracking-tight">
               {car.make} {car.model}
             </h3>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">{car.variant}</p>
           </div>
           <p className="text-right">
             <span className="block text-xl font-bold tracking-tight text-foreground">
