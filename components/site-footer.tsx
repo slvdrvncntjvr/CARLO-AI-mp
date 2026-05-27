@@ -67,14 +67,6 @@ export function SiteFooter() {
             </div>
           </div>
         </div>
-
-        <div className="mt-12 border-t border-border pt-6">
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            This is a hackathon prototype. All inventory data is sourced from public listings (Philkotse,
-            Carmudi, Automart PH) for demonstration purposes only. Vehicles, prices, and locations shown
-            here may not reflect actual current availability.
-          </p>
-        </div>
       </div>
     </footer>
   )
