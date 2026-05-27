@@ -92,27 +92,7 @@ export async function POST(req: Request) {
         token: agentToken,
         agent_rtc_uid: String(agentUid),
         remote_rtc_uids: [String(userUid)],
-        enable_string_uid: false,
-        asr: {
-          vendor: "deepgram",
-          language: "en-US",
-        },
-        llm: {
-          url: llmUrl,
-          api_key: "carlo",
-          system_messages: [
-            {
-              role: "system",
-              content: systemPrompt,
-            },
-          ],
-          greeting_message: greeting,
-          max_history: 20,
-          style: "openai",
-        },
-        tts: {
-          addon: "default",
-        },
+        greeting: greeting,
       },
     }
 
