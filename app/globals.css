@@ -179,3 +179,12 @@
   transform: translateY(-4px);
   box-shadow: 0 12px 40px -12px oklch(0 0 0 / 0.18);
 }
+
+/* Mascot float */
+@keyframes carlo-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.carlo-float {
+  animation: carlo-float 6s ease-in-out infinite;
+}

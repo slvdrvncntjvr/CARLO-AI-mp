@@ -48,7 +48,7 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
         </div>
       </header>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 pb-24 pt-20 md:pb-28 md:pt-24">
+      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 pb-24 pt-20 md:pb-28 md:pt-24 lg:grid-cols-[1.35fr_1fr] lg:gap-8">
         <div className="max-w-4xl">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/80 backdrop-blur">
             <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -109,6 +109,25 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
               <p className="font-mono text-3xl font-bold text-white">&lt;1s</p>
               <p className="mt-1 text-xs text-white/50">Voice response</p>
             </div>
+          </div>
+        </div>
+
+        {/* CARLO mascot — right column */}
+        <div className="relative hidden lg:block">
+          <div className="relative mx-auto aspect-square w-full max-w-md">
+            <div
+              className="absolute inset-x-8 bottom-6 h-40 rounded-full bg-primary/25 blur-3xl"
+              aria-hidden="true"
+            />
+            <div
+              className="absolute inset-0 rounded-full bg-primary/5 blur-2xl"
+              aria-hidden="true"
+            />
+            <img
+              src="/carlo/carlo-hero.png"
+              alt="CARLO, the AI voice agent for Pearson Hardman Motors"
+              className="carlo-float relative h-full w-full select-none object-contain drop-shadow-[0_25px_60px_rgba(34,197,94,0.25)]"
+            />
           </div>
         </div>
       </div>
