@@ -212,7 +212,8 @@ export function CarloCallModal({
               )}
             </div>
           )}
-        </div>}
+        </div>
+
         {/* Status bar */}
         <div className="flex items-center justify-center gap-2 border-t border-white/10 bg-white/5 px-6 py-2">
           <div className="flex items-center gap-1.5">
@@ -230,7 +231,6 @@ export function CarloCallModal({
           <p className="text-xs text-white/60 ml-auto">
             {call.agentSpeaking ? "CARLO is speaking" : call.muted ? "Mic muted" : "Listening"}
           </p>
-        </div>
         </div>
 
         {/* Controls */}
