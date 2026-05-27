@@ -91,6 +91,7 @@ export async function POST(req: Request) {
         channel: channelName,
         token: agentToken,
         agent_rtc_uid: String(agentUid),
+        remote_rtc_uids: [String(userUid)],
         enable_string_uid: false,
         asr: {
           vendor: "deepgram",
@@ -110,11 +111,7 @@ export async function POST(req: Request) {
           style: "openai",
         },
         tts: {
-          vendor: "aws-polly",
-          params: {
-            region: "us-west-2",
-            voice_id: "Joanna",
-          },
+          addon: "default",
         },
       },
     }
@@ -130,11 +127,17 @@ export async function POST(req: Request) {
     })
 
     const agoraJson = await agoraRes.json().catch(() => ({}))
+    console.log("[v0] Agora API response:", {
+      status: agoraRes.status,
+      detail: agoraJson?.detail,
+      agentId: agoraJson?.agent_id,
+    })
+    
     if (!agoraRes.ok) {
       console.error("[v0] agora join failed", {
         status: agoraRes.status,
         response: agoraJson,
-        payloadSent: payload,
+        payloadSent: JSON.stringify(payload, null, 2),
       })
       await supabase.from("leads").update({ status: "lost", summary: "Agent failed to start" }).eq("id", lead.id)
       return NextResponse.json(
