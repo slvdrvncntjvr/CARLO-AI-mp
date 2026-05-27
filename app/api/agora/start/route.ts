@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const appCertificate = process.env.AGORA_APP_CERTIFICATE!
     const customerKey = process.env.AGORA_CUSTOMER_KEY!
     const customerSecret = process.env.AGORA_CUSTOMER_SECRET!
-    const elevenKey = process.env.ELEVENLABS_API_KEY!
+    const elevenKey = process.env.ELEVENLABS_DEV_API_KEY || process.env.ELEVENLABS_API_KEY!
     const elevenVoice = process.env.ELEVENLABS_VOICE_ID!
 
     console.log("[v0] Agora start — env vars present:", {
@@ -24,7 +24,9 @@ export async function POST(req: Request) {
       appCertificate: !!appCertificate,
       customerKey: !!customerKey,
       customerSecret: !!customerSecret,
-      elevenKey: !!elevenKey,
+      elevenDevKey: !!process.env.ELEVENLABS_DEV_API_KEY,
+      elevenKey: !!process.env.ELEVENLABS_API_KEY,
+      elevenKeyUsing: !!elevenKey,
       elevenVoice: !!elevenVoice,
     })
 
