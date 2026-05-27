@@ -1,42 +1,11 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { Phone, PhoneOff, Mic, Volume2, X } from "lucide-react"
+import { useEffect } from "react"
+import { Phone, PhoneOff, Mic, MicOff, X, Loader2, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { type Car, formatPHP } from "@/lib/inventory"
-
-type CallState = "ringing" | "connected" | "ended"
-
-type Line = {
-  who: "carlo" | "you"
-  text: string
-}
-
-function buildScript(car?: Car): Line[] {
-  if (!car) {
-    return [
-      { who: "carlo", text: "Hi! This is CARLO from Pearson Hardman Motors. What kind of car are you looking for today?" },
-      { who: "you", text: "Just browsing — what do you have under 700 thousand?" },
-      { who: "carlo", text: "Great budget. We have a 2020 Toyota Vios 1.3 XE CVT in pearl white at PHP 595,000 — only 42,000 kilometers, casa-maintained. Want me to walk you through it?" },
-    ]
-  }
-  return [
-    {
-      who: "carlo",
-      text: `Hi! I see you're asking about the ${car.year} ${car.make} ${car.model} ${car.variant} — the ${car.color.toLowerCase()} one in ${car.location}. What would you like to know?`,
-    },
-    { who: "you", text: "How's the condition? And is the price negotiable?" },
-    {
-      who: "carlo",
-      text: `It's in ${car.condition.toLowerCase()} condition — ${car.mileage.toLocaleString()} kilometers, ${car.transmission.toLowerCase()} ${car.fuelType.toLowerCase()}. Asking is ${formatPHP(car.price)}. I have some flexibility — what number did you have in mind?`,
-    },
-    { who: "you", text: `Could you do ${formatPHP(Math.round(car.price * 0.82))}?` },
-    {
-      who: "carlo",
-      text: `That's a bit below where we can land today. I can meet you at ${formatPHP(Math.round(car.price * 0.93))} — that's a real number, and I'll have our team confirm in writing. Shall I lock that in?`,
-    },
-  ]
-}
+import { useAgoraCall } from "@/lib/carlo/use-agora-call"
+import { CallStageStepper } from "@/components/call-stage-stepper"
 
 export function CarloCallModal({
   open,
@@ -47,46 +16,40 @@ export function CarloCallModal({
   onClose: () => void
   car?: Car
 }) {
-  const [state, setState] = useState<CallState>("ringing")
-  const [seconds, setSeconds] = useState(0)
-  const [transcript, setTranscript] = useState<Line[]>([])
-  const [activeIndex, setActiveIndex] = useState(0)
-  const script = useRef<Line[]>([])
+  const call = useAgoraCall()
 
   useEffect(() => {
-    if (!open) return
-    setState("ringing")
-    setSeconds(0)
-    setTranscript([])
-    setActiveIndex(0)
-    script.current = buildScript(car)
-
-    const ringTimer = setTimeout(() => setState("connected"), 1400)
-    return () => clearTimeout(ringTimer)
-  }, [open, car])
-
-  useEffect(() => {
-    if (state !== "connected") return
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000)
-    return () => clearInterval(t)
-  }, [state])
-
-  useEffect(() => {
-    if (state !== "connected") return
-    if (activeIndex >= script.current.length) return
-    const line = script.current[activeIndex]
-    const delay = activeIndex === 0 ? 600 : 2200
-    const t = setTimeout(() => {
-      setTranscript((prev) => [...prev, line])
-      setActiveIndex((i) => i + 1)
-    }, delay)
-    return () => clearTimeout(t)
-  }, [state, activeIndex])
+    if (open && call.status === "idle") {
+      call.start({ focusCarId: car?.id })
+    }
+    if (!open && (call.status === "connected" || call.status === "connecting")) {
+      call.stop()
+    }
+    // We deliberately don't depend on `call` to avoid re-running on every state tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   if (!open) return null
 
-  const mm = String(Math.floor(seconds / 60)).padStart(2, "0")
-  const ss = String(seconds % 60).padStart(2, "0")
+  const handleClose = async () => {
+    await call.stop()
+    onClose()
+  }
+
+  const statusLabel =
+    call.status === "starting" || call.status === "connecting"
+      ? "Connecting…"
+      : call.status === "connected"
+        ? call.agentSpeaking
+          ? "CARLO is speaking"
+          : "Listening…"
+        : call.status === "ending"
+          ? "Wrapping up…"
+          : call.status === "ended"
+            ? "Call ended"
+            : call.status === "error"
+              ? "Connection issue"
+              : ""
 
   return (
     <div
@@ -94,14 +57,14 @@ export function CarloCallModal({
       role="dialog"
       aria-modal="true"
       aria-label="Call with CARLO"
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-charcoal text-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
           aria-label="Close call"
         >
@@ -119,7 +82,7 @@ export function CarloCallModal({
                   className="h-full w-full object-cover object-top"
                 />
               </div>
-              {state === "connected" && (
+              {call.status === "connected" && (
                 <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-primary ring-2 ring-charcoal" />
               )}
             </div>
@@ -127,14 +90,10 @@ export function CarloCallModal({
               <div className="flex items-center gap-2">
                 <p className="text-base font-semibold">CARLO</p>
                 <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-primary">
-                  AI Agent
+                  Live AI Agent
                 </span>
               </div>
-              <p className="text-xs text-white/60">
-                {state === "ringing" && "Connecting…"}
-                {state === "connected" && `On call · ${mm}:${ss}`}
-                {state === "ended" && "Call ended"}
-              </p>
+              <p className="text-xs text-white/60">{statusLabel}</p>
             </div>
           </div>
           {car && (
@@ -154,50 +113,84 @@ export function CarloCallModal({
               </div>
             </div>
           )}
+
+          <div className="mt-4 overflow-x-auto pb-1">
+            <CallStageStepper stage={call.stage} />
+          </div>
         </div>
 
-        {/* Body / Transcript */}
-        <div className="relative h-[320px] overflow-y-auto px-6 py-5">
-          {state === "ringing" && (
+        {/* Body */}
+        <div className="relative h-[280px] overflow-y-auto px-6 py-5">
+          {(call.status === "starting" || call.status === "connecting") && (
             <div className="flex h-full flex-col items-center justify-center gap-4">
               <div className="relative">
                 <div className="cta-pulse h-20 w-20 rounded-full bg-primary/30" />
                 <div className="absolute inset-0 grid place-items-center">
-                  <Phone className="h-8 w-8 text-primary" />
+                  <Loader2 className="h-7 w-7 animate-spin text-primary" />
                 </div>
               </div>
               <p className="text-sm text-white/70">CARLO is picking up…</p>
             </div>
           )}
 
-          {state !== "ringing" && (
-            <div className="flex flex-col gap-3">
-              {transcript.map((line, i) => (
+          {call.status === "error" && (
+            <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <p className="text-sm font-semibold">We couldn&apos;t reach CARLO.</p>
+              <p className="text-xs text-white/60">{call.error}</p>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => call.start({ focusCarId: car?.id })}
+                className="mt-2 border-white/20 bg-white/5 text-white hover:bg-white/10"
+              >
+                Try again
+              </Button>
+            </div>
+          )}
+
+          {(call.status === "connected" ||
+            call.status === "ending" ||
+            call.status === "ended") && (
+            <div className="flex h-full flex-col items-center justify-center gap-6">
+              <div className="relative grid place-items-center">
                 <div
-                  key={i}
-                  className={`flex ${line.who === "you" ? "justify-end" : "justify-start"}`}
-                >
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                      line.who === "carlo"
-                        ? "bg-white/8 text-white"
-                        : "bg-primary text-primary-foreground"
-                    }`}
-                  >
-                    {line.text}
-                  </div>
+                  className="absolute inset-0 rounded-full bg-primary/30 transition-transform"
+                  style={{
+                    transform: `scale(${1 + (call.agentLevel / 100) * 1.4})`,
+                    opacity: call.agentSpeaking ? 0.8 : 0.25,
+                  }}
+                />
+                <div className="relative grid h-24 w-24 place-items-center overflow-hidden rounded-full bg-primary/15 ring-1 ring-primary/40">
+                  <img
+                    src="/carlo/carlo-greeting.png"
+                    alt=""
+                    className="h-full w-full object-cover object-top"
+                  />
                 </div>
-              ))}
-              {state === "connected" && activeIndex < script.current.length && (
-                <div className="flex items-center gap-1.5 px-3 py-2 text-white/50">
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/60 [animation-delay:-0.3s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/60 [animation-delay:-0.15s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-white/60" />
-                  <span className="ml-2 text-xs">
-                    {script.current[activeIndex]?.who === "carlo" ? "CARLO is speaking…" : "Listening…"}
-                  </span>
+              </div>
+
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-sm font-medium text-white/80">
+                  {call.agentSpeaking
+                    ? "CARLO is speaking…"
+                    : call.muted
+                      ? "Microphone muted"
+                      : "CARLO is listening"}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  {Array.from({ length: 12 }).map((_, i) => {
+                    const threshold = (i + 1) * (100 / 12)
+                    const filled = call.micLevel >= threshold
+                    return (
+                      <span
+                        key={i}
+                        className={`h-3 w-1 rounded-full transition ${filled ? "bg-primary" : "bg-white/10"}`}
+                      />
+                    )
+                  })}
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
@@ -205,26 +198,30 @@ export function CarloCallModal({
         {/* Controls */}
         <div className="flex items-center justify-center gap-4 border-t border-white/10 bg-ink/60 px-6 py-5">
           <button
-            className="grid h-12 w-12 place-items-center rounded-full bg-white/8 text-white/80 transition hover:bg-white/15"
+            onClick={call.toggleMute}
+            disabled={call.status !== "connected"}
+            className={`grid h-12 w-12 place-items-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              call.muted
+                ? "bg-destructive/20 text-destructive"
+                : "bg-white/8 text-white/80 hover:bg-white/15"
+            }`}
             aria-label="Toggle microphone"
           >
-            <Mic className="h-5 w-5" />
+            {call.muted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
           </button>
           <Button
-            onClick={() => {
-              setState("ended")
-              setTimeout(onClose, 600)
-            }}
+            onClick={handleClose}
             className="h-14 w-14 rounded-full bg-destructive p-0 text-white hover:bg-destructive/90"
             aria-label="End call"
           >
             <PhoneOff className="h-5 w-5" />
           </Button>
           <button
-            className="grid h-12 w-12 place-items-center rounded-full bg-white/8 text-white/80 transition hover:bg-white/15"
-            aria-label="Toggle speaker"
+            disabled
+            className="grid h-12 w-12 place-items-center rounded-full bg-white/8 text-white/40"
+            aria-label="Speaker"
           >
-            <Volume2 className="h-5 w-5" />
+            <Phone className="h-5 w-5" />
           </button>
         </div>
       </div>
