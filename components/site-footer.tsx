@@ -36,26 +36,7 @@ export function SiteFooter() {
                 </li>
               </ul>
             </div>
-            <div>
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Hackathon
-              </p>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="https://www.agora.io/en/conversational-ai-hackathon/"
-                    className="hover:text-primary"
-                  >
-                    Agora Hackathon 2026
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-primary">
-                    Team Pearson Hardman
-                  </a>
-                </li>
-              </ul>
-            </div>
+
             <div>
               <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Follow
