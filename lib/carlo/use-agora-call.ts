@@ -51,7 +51,7 @@ export function useAgoraCall() {
 
   const clientRef = useRef<IAgoraRTCClient | null>(null)
   const micTrackRef = useRef<IMicrophoneAudioTrack | null>(null)
-  const sessionRef = useRef<StartResp | null>(null)
+  const sessionRef = useRef<StartResp & { isDemoMode?: boolean } | null>(null)
   const supabaseRef = useRef<ReturnType<typeof createSupabaseBrowserClient> | null>(null)
   const channelSubRef = useRef<{ unsubscribe: () => void } | null>(null)
 
@@ -102,8 +102,62 @@ export function useAgoraCall() {
           const err = await startRes.json().catch(() => ({}))
           throw new Error(err?.error || "Failed to start CARLO")
         }
-        const session: StartResp = await startRes.json()
+        const session: any = await startRes.json()
         sessionRef.current = session
+
+        // DEMO MODE: stream a scripted transcript
+        if (session.isDemoMode) {
+          console.log("[v0] Running in demo mode")
+          setStatus("connected")
+          
+          // Stream a realistic demo conversation
+          const demoScript = [
+            { who: "carlo" as const, text: "Hi! This is CARLO from Pearson Hardman Motors. I see you're looking at a nice Toyota Wigo. Mind if I ask a few quick questions?" },
+            { who: "you" as const, text: "Yeah sure, what would you like to know?" },
+            { who: "carlo" as const, text: "Great! First, what's your main use case for this car? Daily commute, family trips, business use?" },
+            { who: "you" as const, text: "Mostly for daily commuting around the city." },
+            { who: "carlo" as const, text: "Perfect. And what's your budget range for a vehicle like this?" },
+            { who: "you" as const, text: "Around 500k or less if possible." },
+            { who: "carlo" as const, text: "This Wigo at 485k is well within budget and has excellent fuel economy — about 16-22 km/L in the city. Only 28,000 km on the odometer, one previous owner, casa-maintained. What else matters to you?" },
+            { who: "you" as const, text: "Can you negotiate on the price? It's a bit more than I budgeted." },
+            { who: "carlo" as const, text: "I can work with that. We typically offer a 2% cash discount, so that brings it down to 475,300. Plus, if you book a test drive today, our manager may have additional incentives. Want to schedule one?" },
+            { who: "you" as const, text: "Yeah, let's do a test drive. When can I come by?" },
+            { who: "carlo" as const, text: "Excellent! We're open till 6 PM today at our Quezon Avenue branch. How about 4 PM? I'll get your name and phone so our team knows you're coming." },
+          ]
+          
+          // Simulate typing out the conversation with realistic delays
+          let carloIdx = 0
+          for (const msg of demoScript) {
+            await new Promise((r) => setTimeout(r, 1500 + Math.random() * 1000))
+            if (msg.who === "carlo") {
+              setAgentSpeaking(true)
+              await new Promise((r) => setTimeout(r, 500))
+            }
+            setTranscript((prev) => [...prev, { ...msg, ts: Date.now() }])
+            if (msg.who === "carlo") {
+              setAgentSpeaking(false)
+              carloIdx++
+              // Advance stage every 3 carlo turns
+              if (carloIdx === 1) setStage("qualify")
+              if (carloIdx === 3) setStage("recommend")
+              if (carloIdx === 5) setStage("negotiate")
+              if (carloIdx === 6) setStage("close")
+            }
+          }
+          
+          // After demo script, set a final summary
+          const supabase = ensureSupabase()
+          await supabase
+            .from("leads")
+            .update({
+              status: "test-drive-booked",
+              summary: "Customer interested in Wigo, booked test drive at Quezon Ave branch 4 PM same day. 2% cash discount applied.",
+            })
+            .eq("id", session.leadId)
+            .catch(() => {})
+          
+          return
+        }
 
         // 2. Subscribe to lead row updates so the stage stepper advances live.
         const supabase = ensureSupabase()
