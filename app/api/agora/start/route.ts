@@ -16,27 +16,17 @@ export async function POST(req: Request) {
     const appCertificate = process.env.AGORA_APP_CERTIFICATE!
     const customerKey = process.env.AGORA_CUSTOMER_KEY!
     const customerSecret = process.env.AGORA_CUSTOMER_SECRET!
-    const elevenKey = process.env.ELEVENLABS_DEV_API_KEY || process.env.ELEVENLABS_API_KEY!
-    const elevenVoice = process.env.ELEVENLABS_VOICE_ID!
 
-    console.log("[v0] Agora start — env vars present:", {
+    console.log("[v0] Agora start — credentials check:", {
       appId: !!appId,
       appCertificate: !!appCertificate,
       customerKey: !!customerKey,
       customerSecret: !!customerSecret,
-      elevenDevKey: !!process.env.ELEVENLABS_DEV_API_KEY,
-      elevenKey: !!process.env.ELEVENLABS_API_KEY,
-      elevenKeyUsing: !!elevenKey,
-      elevenVoice: !!elevenVoice,
     })
 
     if (!appId || !appCertificate || !customerKey || !customerSecret) {
       console.error("[v0] Missing Agora credentials")
       return NextResponse.json({ error: "Agora credentials not configured" }, { status: 500 })
-    }
-    if (!elevenKey || !elevenVoice) {
-      console.error("[v0] Missing ElevenLabs credentials", { elevenKey: !!elevenKey, elevenVoice: !!elevenVoice })
-      return NextResponse.json({ error: "ElevenLabs credentials not configured" }, { status: 500 })
     }
 
     const channelName = `carlo-${randomUUID().slice(0, 12)}`
@@ -124,14 +114,9 @@ export async function POST(req: Request) {
           output_modalities: ["text"],
         },
         tts: {
-          vendor: "elevenlabs",
+          vendor: "aws-polly",
           params: {
-            key: elevenKey,
-            model_id: "eleven_turbo_v2_5",
-            voice_id: elevenVoice,
-            stability: 0.5,
-            similarity_boost: 0.8,
-            style: 0.2,
+            region: "us-west-2",
           },
         },
         parameters: {
