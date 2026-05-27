@@ -37,6 +37,7 @@ type StartResp = {
   agentUid: number
   agentId: string
   leadId: string
+  isDemoMode?: boolean
 }
 
 export function useAgoraCall() {
@@ -105,7 +106,54 @@ export function useAgoraCall() {
         const session: StartResp = await startRes.json()
         sessionRef.current = session
 
-        // 2. Subscribe to lead row updates so the stage stepper advances live.
+        // Handle demo mode: fetch pre-seeded events and stream them
+        if (session.isDemoMode) {
+          const supabase = ensureSupabase()
+          setStatus("connected")
+          
+          // Fetch all the pre-seeded events
+          const { data: events } = await supabase
+            .from("lead_events")
+            .select("*")
+            .eq("lead_id", session.leadId)
+            .order("created_at", { ascending: true })
+            .catch(() => ({ data: [] }))
+          
+          // Stream them with realistic delays
+          if (events && events.length > 0) {
+            let carloCount = 0
+            for (const event of events) {
+              const evType = event.type as string
+              const text = (event.payload as any)?.text || ""
+              
+              // Simulate user/carlo speaking with delays
+              if (evType.includes("carlo")) {
+                setAgentSpeaking(true)
+                await new Promise((r) => setTimeout(r, 800))
+              }
+              
+              setTranscript((prev) => [...prev, { 
+                who: evType.includes("you") ? "you" : "carlo", 
+                text, 
+                ts: Date.now() 
+              }])
+              
+              if (evType.includes("carlo")) {
+                setAgentSpeaking(false)
+                carloCount++
+                // Advance stages: first 1-2 turns = qualify, 3-4 = recommend, 5-6 = negotiate, 7+ = close
+                if (carloCount === 2) setStage("recommend")
+                if (carloCount === 4) setStage("negotiate")
+                if (carloCount >= 6) setStage("close")
+              }
+              
+              // Delay between messages
+              await new Promise((r) => setTimeout(r, 1000 + Math.random() * 500))
+            }
+          }
+          
+          return
+        }
         const supabase = ensureSupabase()
         const channel = supabase
           .channel(`lead-${session.leadId}`)
