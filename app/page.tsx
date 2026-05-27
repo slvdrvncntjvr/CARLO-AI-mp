@@ -21,8 +21,8 @@ export default function Page() {
   return (
     <main className="min-h-screen bg-background">
       <HeroSection onCall={() => openCall(undefined)} />
-      <HowItWorks />
       <InventorySection onCallCar={(car) => openCall(car)} />
+      <HowItWorks />
       <DemoSection onCall={() => openCall(undefined)} />
       <SiteFooter />
 
