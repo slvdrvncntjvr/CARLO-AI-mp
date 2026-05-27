@@ -82,10 +82,6 @@ export function DemoSection({ onCall }: { onCall: () => void }) {
             </div>
           </div>
         </div>
-
-        <p className="mt-8 text-center text-xs text-white/50">
-          Tip for judges: ask CARLO about a specific car from the inventory above — he already knows it.
-        </p>
       </div>
     </section>
   )

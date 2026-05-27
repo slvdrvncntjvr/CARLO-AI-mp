@@ -1,8 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Link from "next/link"
-import { Phone, Search, Gauge, Cog, Fuel, MapPin, ArrowUpDown } from "lucide-react"
+import { Search, Gauge, Cog, Fuel, MapPin, ArrowUpDown, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Slider } from "@/components/ui/slider"
@@ -16,6 +15,7 @@ import {
 import { SiteHeader } from "@/components/site-header"
 import { SiteFooter } from "@/components/site-footer"
 import { CarloCallModal } from "@/components/carlo-call-modal"
+import { CarloFab } from "@/components/carlo-fab"
 import { type Car, formatMileage, formatPHP, inventory } from "@/lib/inventory"
 import { cn } from "@/lib/utils"
 
@@ -98,11 +98,11 @@ export default function InventoryPage() {
             Live inventory
           </p>
           <h1 className="mt-3 text-balance text-4xl font-bold tracking-tight text-white md:text-6xl">
-            Browse every car on the lot.
+            Browse the lot.
           </h1>
           <p className="mt-4 max-w-2xl text-pretty text-lg leading-relaxed text-white/70">
-            Tap any car to talk to CARLO. He has the full service history, real pricing, and can
-            negotiate live on the call.
+            Eight carefully inspected units in stock. Filter, sort, and find the one that fits.
+            When you have a question on a specific car, our AI agent CARLO is one tap away.
           </p>
         </div>
       </div>
@@ -202,20 +202,20 @@ export default function InventoryPage() {
 
               <div className="mt-6 rounded-2xl border border-border bg-foreground p-6 text-background">
                 <p className="text-xs font-semibold uppercase tracking-wider text-background/60">
-                  Not sure what to pick?
+                  Need a hand?
                 </p>
                 <p className="mt-2 text-base font-bold">
-                  Let CARLO recommend a car.
+                  Let CARLO match a unit to you.
                 </p>
                 <p className="mt-2 text-sm text-background/70">
-                  Tell him your budget, family size and use case — he&apos;ll match you to a unit.
+                  Tell him your budget, family size and use case &mdash; he&apos;ll shortlist what fits.
                 </p>
                 <Button
                   onClick={() => openCall(undefined)}
                   className="mt-4 h-11 w-full rounded-xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
                 >
-                  <Phone className="mr-2 h-4 w-4 fill-current" />
-                  Call CARLO
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Ask CARLO
                 </Button>
               </div>
             </aside>
@@ -249,6 +249,8 @@ export default function InventoryPage() {
       </section>
 
       <SiteFooter />
+
+      <CarloFab onClick={() => openCall(undefined)} />
 
       <CarloCallModal
         open={callOpen}
@@ -351,10 +353,11 @@ function CarCard({ car, onCall }: { car: Car; onCall: () => void }) {
 
         <Button
           onClick={onCall}
-          className="mt-5 h-11 w-full rounded-xl bg-foreground font-semibold text-background hover:bg-foreground/90"
+          variant="outline"
+          className="mt-5 h-11 w-full rounded-xl border-border bg-background font-semibold hover:border-foreground/30 hover:bg-muted"
         >
-          <Phone className="mr-2 h-4 w-4 fill-current" />
-          Call CARLO About This Car
+          <Sparkles className="mr-2 h-4 w-4 text-primary" />
+          Ask CARLO about this
         </Button>
       </div>
     </article>

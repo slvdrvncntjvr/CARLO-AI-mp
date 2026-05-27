@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Phone, ArrowRight, Sparkles } from "lucide-react"
+import { ArrowRight, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SiteHeader } from "@/components/site-header"
 
@@ -36,15 +36,15 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
           </div>
 
           <h1 className="text-balance text-5xl font-bold leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
-            Quality used cars.
+            Quality used cars,
             <br />
-            <span className="text-primary">Negotiated by AI.</span>
+            <span className="text-primary">ready to drive home.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-white/70">
-            Browse our live inventory of carefully inspected sedans, SUVs and pickups. Every unit
-            on this lot is talkable — pick a car and our AI agent CARLO will answer your questions
-            and quote a real price, 24/7.
+            Sedans, SUVs and pickups, every unit carefully inspected and priced fair. Browse the
+            full lot, find the one you like, and our AI agent CARLO is on standby to answer
+            questions or quote you a real price, day or night.
           </p>
 
           <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -66,28 +66,25 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
               <span className="relative flex h-8 w-8 items-center justify-center">
                 <span className="absolute inset-0 rounded-full bg-primary/40 cta-pulse" />
                 <span className="relative grid h-8 w-8 place-items-center rounded-full bg-primary text-primary-foreground">
-                  <Phone className="h-3.5 w-3.5 fill-current" />
+                  <Sparkles className="h-3.5 w-3.5" />
                 </span>
               </span>
-              <span className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                Or just call CARLO now
-              </span>
+              <span>Talk to CARLO instead</span>
             </button>
           </div>
 
           <div className="mt-14 grid max-w-2xl grid-cols-3 gap-6 border-t border-white/10 pt-8">
             <div>
               <p className="font-mono text-3xl font-bold text-white">8</p>
-              <p className="mt-1 text-xs text-white/50">Units in stock</p>
+              <p className="mt-1 text-xs text-white/50">Units on the lot</p>
+            </div>
+            <div>
+              <p className="font-mono text-3xl font-bold text-white">120-pt</p>
+              <p className="mt-1 text-xs text-white/50">Inspection per unit</p>
             </div>
             <div>
               <p className="font-mono text-3xl font-bold text-white">24/7</p>
-              <p className="mt-1 text-xs text-white/50">CARLO is on call</p>
-            </div>
-            <div>
-              <p className="font-mono text-3xl font-bold text-white">&lt;1s</p>
-              <p className="mt-1 text-xs text-white/50">Voice response</p>
+              <p className="mt-1 text-xs text-white/50">CARLO on standby</p>
             </div>
           </div>
         </div>
@@ -106,7 +103,8 @@ export function HeroSection({ onCall }: { onCall: () => void }) {
             <img
               src="/carlo/carlo-hero.png"
               alt="CARLO, the AI voice agent for Pearson Hardman Motors"
-              className="carlo-float relative h-full w-full select-none object-contain drop-shadow-[0_25px_60px_rgba(34,197,94,0.25)]"
+              className="carlo-float relative h-full w-full select-none object-contain"
+              style={{ mixBlendMode: "lighten" }}
             />
           </div>
         </div>
